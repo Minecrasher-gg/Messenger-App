@@ -7,7 +7,7 @@ const serviceAccount = JSON.parse(fs.readFileSync("./firebaseKey.json", "utf8"))
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://fir-test-c1f02.firebaseio.com",
+  databaseURL: "https://fir-test-c1f02-default-rtdb.firebaseio.com",
 });
 
 const db = admin.database();

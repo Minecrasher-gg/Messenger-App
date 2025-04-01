@@ -1,11 +1,17 @@
 {
   "dependencies": {
+    "@expo/metro-runtime": "~4.0.1",
     "expo": "^52.0.42",
     "firebase": "^11.6.0",
     "firebase-admin": "^13.2.0",
-    "socket.io": "^4.8.1",
     "react-dom": "18.3.1",
     "react-native-web": "~0.19.13",
-    "@expo/metro-runtime": "~4.0.1"
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "electron": "^35.1.2"
+  },
+  "scripts": {
+    "start": "electron ."
   }
 }
