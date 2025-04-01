@@ -1,6 +1,11 @@
 {
   "dependencies": {
+    "expo": "^52.0.42",
     "firebase": "^11.6.0",
-    "firebase-admin": "^13.2.0"
+    "firebase-admin": "^13.2.0",
+    "socket.io": "^4.8.1",
+    "react-dom": "18.3.1",
+    "react-native-web": "~0.19.13",
+    "@expo/metro-runtime": "~4.0.1"
   }
 }
