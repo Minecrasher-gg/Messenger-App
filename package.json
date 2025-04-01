@@ -4,6 +4,7 @@
   "dependencies": {
     "firebase": "^11.6.0",
     "firebase-admin": "^13.2.0",
+    "node-gtk": "^0.14.0",
     "socket.io": "^4.8.1"
   }
 }

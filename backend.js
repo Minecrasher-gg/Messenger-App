@@ -1,5 +1,4 @@
 const admin = require("firebase-admin");
-const readline = require("readline");
 const fs = require("fs");
 
 // Load Firebase credentials
@@ -13,31 +12,32 @@ admin.initializeApp({
 const db = admin.database();
 const messagesRef = db.ref("messages");
 
-// Read user input
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+// Store messages locally (for faster GUI updates)
+let messages = [];
 
-function sendMessage() {
-  rl.question("Enter your message: ", (message) => {
-    if (message.toLowerCase() === "exit") {
-      rl.close();
-      process.exit();
-    }
-
-    messagesRef.push({
-      text: message,
-      timestamp: Date.now()
-    });
-
-    messagesRef.on("child_added", (snapshot) => {
-        console.log("\nNew Message:", snapshot.val().text);
-      });      
-
-    console.log("Message sent!");
-    sendMessage(); // Ask for another message
+// Function to send a message
+function sendMessage(message) {
+  if (!message.trim()) return;
+  
+  messagesRef.push({
+    text: message,
+    timestamp: Date.now(),
   });
+
+  console.log("Message sent:", message);
 }
 
-sendMessage();
+// Function to get messages
+function getMessages() {
+  return messages;
+}
+
+// Listen for new messages in real-time
+messagesRef.on("child_added", (snapshot) => {
+  const newMessage = snapshot.val().text;
+  messages.push(newMessage);
+  console.log("New Message:", newMessage);
+});
+
+// Export functions for GUI to use
+module.exports = { sendMessage, getMessages };
