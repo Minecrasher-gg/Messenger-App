@@ -46,8 +46,20 @@ function sendMessage() {
 
 // Function to update chat display
 function updateChatDisplay() {
+    chatBuffer.setText('', 0); // Clear the buffer
     const messages = backend.getMessages(); // Get messages from backend
-    chatBuffer.setText(messages.join("\n"), messages.join("\n").length);
+    const usernames = backend.getUsernames();
+    const iter = chatBuffer.getEndIter();
+    let count = 0;
+    for (let i = 0; i < usernames.length; i++) {
+        const markupUsername = `<span foreground="red">${usernames[count]}</span>\n`;
+        const markupMessage = `<span foreground="white">${messages[count]}</span>\n`;
+        chatBuffer.insertMarkup(iter, markupUsername, -1);
+        chatBuffer.insertMarkup(iter, markupMessage, -1);
+        count++;
+      } 
+    //chatBuffer.setText(messages.join("\n"), messages.join("\n").length);
+    //chatBuffer.insertMarkup(iter, markupMessage, -1); // Insert markup text
 }
 
 // Real-time message updates

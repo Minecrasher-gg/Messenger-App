@@ -14,6 +14,7 @@ const messagesRef = db.ref("messages");
 
 // Store messages locally (for faster GUI updates)
 let messages = [];
+let usernames = [];
 
 // Function to send a message
 function sendMessage(username, message) {
@@ -21,6 +22,7 @@ function sendMessage(username, message) {
   
   messagesRef.push({
     text: message,
+    user: username,
     timestamp: Date.now(),
   });
 
@@ -32,12 +34,18 @@ function getMessages() {
   return messages;
 }
 
+function getUsernames() {
+  return usernames;
+}
+
 // Listen for new messages in real-time
 messagesRef.on("child_added", (snapshot) => {
   const newMessage = snapshot.val().text;
+  const newUsername = snapshot.val().user;
   messages.push(newMessage);
+  usernames.push(newUsername);
   //console.log("New Message:", newMessage);
 });
 
 // Export functions for GUI to use
-module.exports = { sendMessage, getMessages };
+module.exports = { sendMessage, getMessages, getUsernames };
