@@ -1,10 +1,15 @@
 {
   "name": "messenger-app",
   "version": "1.0.0",
+  "bin": "gui.js",
   "dependencies": {
     "firebase": "^11.6.0",
     "firebase-admin": "^13.2.0",
     "node-gtk": "^0.14.0",
     "socket.io": "^4.8.1"
+  },
+  "pkg": {
+    "scripts": [],
+    "assets": "node_modules/node-gtk/**/*"
   }
 }
