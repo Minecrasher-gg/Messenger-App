@@ -16,7 +16,7 @@ const messagesRef = db.ref("messages");
 let messages = [];
 
 // Function to send a message
-function sendMessage(message) {
+function sendMessage(username, message) {
   if (!message.trim()) return;
   
   messagesRef.push({
@@ -24,7 +24,7 @@ function sendMessage(message) {
     timestamp: Date.now(),
   });
 
-  console.log("Message sent:", message);
+  //console.log("Message sent:", message);
 }
 
 // Function to get messages
@@ -36,7 +36,7 @@ function getMessages() {
 messagesRef.on("child_added", (snapshot) => {
   const newMessage = snapshot.val().text;
   messages.push(newMessage);
-  console.log("New Message:", newMessage);
+  //console.log("New Message:", newMessage);
 });
 
 // Export functions for GUI to use

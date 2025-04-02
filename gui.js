@@ -37,8 +37,9 @@ vbox.packStart(sendButton, false, false, 0);
 // Function to send a message
 function sendMessage() {
     const message = entry.getText();
+    const username = "Fryer";
     if (message.trim() !== '') {
-        backend.sendMessage(message); // Call backend function
+        backend.sendMessage(username, message); // Call backend function
         entry.setText('');
     }
 }
@@ -46,7 +47,7 @@ function sendMessage() {
 // Function to update chat display
 function updateChatDisplay() {
     const messages = backend.getMessages(); // Get messages from backend
-    chatBuffer.setText(messages.join("\n"));
+    chatBuffer.setText(messages.join("\n"), messages.join("\n").length);
 }
 
 // Real-time message updates
