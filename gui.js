@@ -5,6 +5,8 @@ const backend = require('./backend'); // Import backend
 gi.startLoop();
 Gtk.init();
 
+// ------ NEW CHATGPT LOGIN STUFF -------
+
 function showLoginDialog(parent) {
   // Create a new dialog window
   const dialog = new Gtk.Dialog();
@@ -48,6 +50,8 @@ loginButton.connect("clicked", () => showLoginDialog(win));
 const box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 10 });
 box.packStart(loginButton, false, false, 10);
 win.add(box);
+
+// --------- NEW CHATGPT STUFF END ---------
 
 // Create window
 const win = new Gtk.Window();
