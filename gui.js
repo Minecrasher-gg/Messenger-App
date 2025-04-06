@@ -7,49 +7,49 @@ Gtk.init();
 
 // ------ NEW CHATGPT LOGIN STUFF -------
 
-function showLoginDialog(parent) {
+// function showLoginDialog(parent) {
   // Create a new dialog window
-  const dialog = new Gtk.Dialog();
-  dialog.setTitle("Login");
-  dialog.setTransientFor(parent);
-  dialog.setModal(true);
+//  const dialog = new Gtk.Dialog();
+//  dialog.setTitle("Login");
+//  dialog.setTransientFor(parent);
+//  dialog.setModal(true);
 
   // Create username & password fields
-  const contentArea = dialog.getContentArea();
-  const usernameEntry = new Gtk.Entry();
-  usernameEntry.setPlaceholderText("Username");
+//  const contentArea = dialog.getContentArea();
+//  const usernameEntry = new Gtk.Entry();
+//  usernameEntry.setPlaceholderText("Username");
 
-  const passwordEntry = new Gtk.Entry();
-  passwordEntry.setPlaceholderText("Password");
-  passwordEntry.setVisibility(false); // Hide password characters
+//  const passwordEntry = new Gtk.Entry();
+//  passwordEntry.setPlaceholderText("Password");
+//  passwordEntry.setVisibility(false); // Hide password characters
 
   // Add fields to the dialog
-  contentArea.packStart(usernameEntry, false, false, 5);
-  contentArea.packStart(passwordEntry, false, false, 5);
+//  contentArea.packStart(usernameEntry, false, false, 5);
+//  contentArea.packStart(passwordEntry, false, false, 5);
 
   // Add "Login" and "Cancel" buttons
-  dialog.addButton("Cancel", Gtk.ResponseType.CANCEL);
-  dialog.addButton("Login", Gtk.ResponseType.OK);
+//  dialog.addButton("Cancel", Gtk.ResponseType.CANCEL);
+//  dialog.addButton("Login", Gtk.ResponseType.OK);
 
   // Show all elements
-  dialog.showAll();
+//  dialog.showAll();
 
   // Wait for user response
-  dialog.connect("response", (widget, response) => {
-    if (response === Gtk.ResponseType.OK) {
-      console.log("Logging in with:", usernameEntry.getText(), passwordEntry.getText());
-    }
-    dialog.destroy(); // Close the dialog
-  });
-}
+//  dialog.connect("response", (widget, response) => {
+//    if (response === Gtk.ResponseType.OK) {
+//      console.log("Logging in with:", usernameEntry.getText(), passwordEntry.getText());
+//    }
+//    dialog.destroy(); // Close the dialog
+//  });
+//}
 
 // Create a login button
-const loginButton = new Gtk.Button({ label: "Log In" });
-loginButton.connect("clicked", () => showLoginDialog(win));
+//const loginButton = new Gtk.Button({ label: "Log In" });
+//loginButton.connect("clicked", () => showLoginDialog(win));
 
-const box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 10 });
-box.packStart(loginButton, false, false, 10);
-win.add(box);
+//const box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 10 });
+//box.packStart(loginButton, false, false, 10);
+//win.add(box);
 
 // --------- NEW CHATGPT STUFF END ---------
 
@@ -93,21 +93,32 @@ function sendMessage() {
 }
 
 // Function to update chat display
+let cachedMessageCount = 0;
+
 function updateChatDisplay() {
-    chatBuffer.setText('', 0); // Clear the buffer
-    const messages = backend.getMessages(); // Get messages from backend
-    const usernames = backend.getUsernames();
-    const iter = chatBuffer.getEndIter();
-    let count = 0;
-    for (let i = 0; i < usernames.length; i++) {
-        const markupUsername = `<span foreground="red">${usernames[count]}</span>\n`;
-        const markupMessage = `<span foreground="white">${messages[count]}</span>\n`;
-        chatBuffer.insertMarkup(iter, markupUsername, -1);
-        chatBuffer.insertMarkup(iter, markupMessage, -1);
-        count++;
-      } 
-    //chatBuffer.setText(messages.join("\n"), messages.join("\n").length);
-    //chatBuffer.insertMarkup(iter, markupMessage, -1); // Insert markup text
+  const messages = backend.getMessages();
+  const usernames = backend.getUsernames();
+
+  if (messages.length === cachedMessageCount) {
+    return;
+  }
+
+  console.log("New messages detected. Updating chat...");
+
+  // Update cached message count
+  cachedMessageCount = messages.length;
+
+  chatBuffer.setText('', 0); // Clear the buffer
+  const iter = chatBuffer.getEndIter();
+  for (let i = 0; i < usernames.length; i++) {
+    const markupUsername = `<span foreground="red">${usernames[i]}</span>\n`;
+    const markupMessage = `<span foreground="grey">${messages[i]}</span>\n`;
+    chatBuffer.insertMarkup(iter, markupUsername, -1);
+    chatBuffer.insertMarkup(iter, markupMessage, -1);
+  }
+  // Scroll to bottom after updating chat
+  const mark = chatBuffer.createMark(null, chatBuffer.getEndIter(), false);
+  chatDisplay.scrollToMark(mark, 0, true, 0, 1); // chatView is your Gtk.TextView
 }
 
 // Real-time message updates
