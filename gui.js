@@ -56,8 +56,68 @@ loginButton.on("clicked", () => {
     lbox.packStart(loginClicker, false, false, 10);
     loginWin.add(lbox);
     loginWin.showAll();
-})
+});
 vbox.packStart(loginButton, false, false, 0);
+
+
+// Everything for the register screen needed outside itself
+const RegisterWin = new Gtk.Window();
+const rBox = new Gtk.Box({
+  orientation: Gtk.Orientation.VERTICAL,
+  spacing: 10,
+});
+const RegisterButton = new Gtk.Button({label: "Register"});
+const RegisterResult = new Gtk.Label();
+
+RegisterButton.on("clicked", () => {
+  RegisterWin.setTitle("Register prompt");
+    RegisterWin.setDefaultSize(550, 200);
+    const registertext = new Gtk.Label({ label: "Welcome to messenger! Enter your username and a password to get started"});
+    const usernametext = new Gtk.Label({ label: "Username:"});
+    const passwordtext = new Gtk.Label({ label: "Password:"});
+    const registerClicker = new Gtk.Button({ label: "Register"});
+    registerClicker.on("clicked", () => {
+      PutInUsername = usernameEntry.getText();
+      PutInKeyphr = passwordEntry.getText();
+      const userAccs = backend.getUserAccs();
+      RegisterWin.showAll();
+      if (userAccs.indexOf(PutInUsername) === -1) {
+        if (PutInKeyphr === "") {
+          rBox.remove(RegisterResult);
+          const message = "You gotta give your account a password, y'know....";
+          RegisterResult.setMarkup(`<span foreground="lightblue">${message}</span>`);
+          rBox.packStart(RegisterResult, false, false, 10);
+          RegisterWin.showAll();
+        }else {
+          rBox.remove(RegisterResult);
+          const message = "It's your lucky day! This username is available. You can close this window and login with your new accout. Have fun!";
+          RegisterResult.setMarkup(`<span foreground="lightblue">${message}</span>`);
+          rBox.packStart(RegisterResult, false, false, 10);
+          RegisterWin.showAll();
+          
+          //backend.addUser(PutInUsername, PutInKeyphr);
+        }
+      }else {
+        rBox.remove(RegisterResult);
+        const message = "Whoops! That username is already in use. Try a different one!";
+        RegisterResult.setMarkup(`<span foreground="lightblue">${message}</span>`);
+       rBox.packStart(RegisterResult, false, false, 10);
+       RegisterWin.showAll();
+        
+      }
+    });
+    const usernameEntry = new Gtk.Entry();
+    const passwordEntry = new Gtk.Entry();
+    rBox.packStart(registertext, false, false, 10);
+    rBox.packStart(usernametext, false, false, 10);
+    rBox.packStart(usernameEntry, false, false, 10);
+    rBox.packStart(passwordtext, false, false, 0);
+    rBox.packStart(passwordEntry, false, false, 10);
+    rBox.packStart(registerClicker, false, false, 10);
+    RegisterWin.add(rBox);
+    RegisterWin.showAll();
+});
+vbox.packStart(RegisterButton, false, false, 0);
 
 // Chat display
 const chatDisplay = new Gtk.TextView();
@@ -80,7 +140,7 @@ const sendButton = new Gtk.Button({ label: 'Send' });
 // Function to send a message
 function sendMessage() {
     const message = entry.getText();
-    const username = "Fryer";
+    const username = PutInUsername;
     if (message.trim() !== '') {
         backend.sendMessage(username, message); // Call backend function
         entry.setText('');
@@ -93,6 +153,8 @@ function ChatToolsShouldShow() {
     vbox.packStart(scrolledWindow, true, true, 0);
     vbox.packStart(entry, false, false, 0);
     vbox.packStart(sendButton, false, false, 0);
+    vbox.remove(loginButton);
+    vbox.remove(RegisterButton);
   }else {
     vbox.packStart(LoginPlease, false, false, 50);
   }
