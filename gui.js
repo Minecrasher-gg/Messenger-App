@@ -14,11 +14,16 @@ loginButton.on("clicked", () => {
     loginWin.setDefaultSize(300, 200);
     const logintext = new Gtk.label({ label: "Welcome back! Enter you username and password"});
     const loginClicker = new Gtk.button({ label: "login"});
-    loginWin.add(loginClicker);
-    loginWin.add(logintext);
+    const lbox = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing: 10,
+    });
+    lbox.packStart(logintext, false, false, 0);
+    lbox.packStart(loginClicker, false, false, 0);
+    loginWin.add(lbox);
     loginWin.showAll();
 })
-win.add(loginButton);
+lbox.packStart(loginButton, false, false, 0);
 
 // --------- NEW CHATGPT STUFF END ---------
 
