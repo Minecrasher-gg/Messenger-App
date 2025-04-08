@@ -83,6 +83,13 @@ usersRef.once("value")
     console.error("Failed to fetch users:", err);
   });
 
+usersRef.on("child_added", (snapshot) => {
+    const AllUsers = snapshot.val().username;
+    const AllPWS = snapshot.val().keyphrase;
+    userAccs.push(AllUsers);
+    userKeyphr.push(AllPWS);
+});
+
 // Listen for new messages in real-time
 messagesRef.on("child_added", (snapshot) => {
   const newMessage = snapshot.val().text;
