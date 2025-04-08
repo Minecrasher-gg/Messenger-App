@@ -13,6 +13,8 @@ loginButton.on("clicked", () => {
     loginWin.setTitle("Login prompt");
     loginWin.setDefaultSize(300, 200);
     const logintext = new Gtk.label({ label: "Welcome back! Enter you username and password"});
+    const loginClicker = new Gtk.button({ label: "login"});
+    loginWin.add(loginClicker);
     loginWin.add(logintext);
     loginWin.showAll();
 })
