@@ -5,28 +5,6 @@ const backend = require('./backend'); // Import backend
 gi.startLoop();
 Gtk.init();
 
-// ------ NEW CHATGPT LOGIN STUFF -------
-
-const loginButton = new Gtk.button({ label: "login"});
-loginButton.on("clicked", () => {
-    const loginWin = new Gtk.Window();
-    loginWin.setTitle("Login prompt");
-    loginWin.setDefaultSize(300, 200);
-    const logintext = new Gtk.label({ label: "Welcome back! Enter you username and password"});
-    const loginClicker = new Gtk.button({ label: "login"});
-    const lbox = new Gtk.Box({
-        orientation: Gtk.Orientation.VERTICAL,
-        spacing: 10,
-    });
-    lbox.packStart(logintext, false, false, 0);
-    lbox.packStart(loginClicker, false, false, 0);
-    loginWin.add(lbox);
-    loginWin.showAll();
-})
-vbox.packStart(loginButton, false, false, 0);
-
-// --------- NEW CHATGPT STUFF END ---------
-
 // Create window
 const win = new Gtk.Window();
 win.setTitle('Messenger');
@@ -36,9 +14,39 @@ win.connect('destroy', () => {
     process.exit(0);
 });
 
-// Layout
+// Box for putting all the Buttons n shit into
 const vbox = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 10 });
 win.add(vbox);
+
+// ------ NEW CHATGPT LOGIN STUFF -------
+
+const loginButton = new Gtk.Button({ label: "login"});
+loginButton.on("clicked", () => {
+    const loginWin = new Gtk.Window();
+    loginWin.setTitle("Login prompt");
+    loginWin.setDefaultSize(400, 200);
+    const logintext = new Gtk.Label({ label: "Welcome back! Enter you username and password"});
+    const usernametext = new Gtk.Label({ label: "Username:"});
+    const passwordtext = new Gtk.Label({ label: "Password:"});
+    const loginClicker = new Gtk.Button({ label: "login"});
+    const usernameEntry = new Gtk.Entry();
+    const passwordEntry = new Gtk.Entry();
+    const lbox = new Gtk.Box({
+        orientation: Gtk.Orientation.VERTICAL,
+        spacing: 10,
+    });
+    lbox.packStart(logintext, false, false, 10);
+    lbox.packStart(usernametext, false, false, 0);
+    lbox.packStart(usernameEntry, false, false, 10);
+    lbox.packStart(passwordtext, false, false, 0);
+    lbox.packStart(passwordEntry, false, false, 10);
+    lbox.packStart(loginClicker, false, false, 10);
+    loginWin.add(lbox);
+    loginWin.showAll();
+})
+vbox.packStart(loginButton, false, false, 0);
+
+// --------- NEW CHATGPT STUFF END ---------
 
 // Chat display
 const chatDisplay = new Gtk.TextView();
