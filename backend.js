@@ -64,16 +64,24 @@ function getUsernames() {
 
 function getUserAccs() {
     return userAccs;
-    return userKeyphr;
 }
 
-usersRef.on("child_added", (snapshot) => {
-    const AllUsers = snapshot.val().username;
-    const AllPWS = snapshot.val().keyphrase;
-    userAccs.push(AllUsers);
-    userKeyphr.push(AllPWS);
-    
-});
+function getUserKeyphr() {
+  return userKeyphr;
+}
+
+usersRef.once("value")
+  .then((snapshot) => {
+    snapshot.forEach((childSnap) => {
+      const AllUsers = childSnap.val().username;
+      const AllPWS = childSnap.val().keyphrase;
+      userAccs.push(AllUsers);
+      userKeyphr.push(AllPWS);
+    });
+  })
+  .catch((err) => {
+    console.error("Failed to fetch users:", err);
+  });
 
 // Listen for new messages in real-time
 messagesRef.on("child_added", (snapshot) => {
@@ -85,4 +93,4 @@ messagesRef.on("child_added", (snapshot) => {
 });
 
 // Export functions for GUI to use
-module.exports = { sendMessage, getMessages, getUsernames, addUser, getUserAccs};
+module.exports = { sendMessage, getMessages, getUsernames, addUser, getUserAccs, getUserKeyphr};
