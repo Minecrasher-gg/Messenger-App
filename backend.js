@@ -62,6 +62,11 @@ function getUsernames() {
   return usernames;
 }
 
+function getUserAccs() {
+    return userAccs;
+    return userKeyphr;
+}
+
 usersRef.on("child_added", (snapshot) => {
     const AllUsers = snapshot.val().username;
     const AllPWS = snapshot.val().keyphrase;
@@ -80,4 +85,4 @@ messagesRef.on("child_added", (snapshot) => {
 });
 
 // Export functions for GUI to use
-module.exports = { sendMessage, getMessages, getUsernames, addUser};
+module.exports = { sendMessage, getMessages, getUsernames, addUser, getUserAccs};
