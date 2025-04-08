@@ -7,49 +7,16 @@ Gtk.init();
 
 // ------ NEW CHATGPT LOGIN STUFF -------
 
-// function showLoginDialog(parent) {
-  // Create a new dialog window
-//  const dialog = new Gtk.Dialog();
-//  dialog.setTitle("Login");
-//  dialog.setTransientFor(parent);
-//  dialog.setModal(true);
-
-  // Create username & password fields
-//  const contentArea = dialog.getContentArea();
-//  const usernameEntry = new Gtk.Entry();
-//  usernameEntry.setPlaceholderText("Username");
-
-//  const passwordEntry = new Gtk.Entry();
-//  passwordEntry.setPlaceholderText("Password");
-//  passwordEntry.setVisibility(false); // Hide password characters
-
-  // Add fields to the dialog
-//  contentArea.packStart(usernameEntry, false, false, 5);
-//  contentArea.packStart(passwordEntry, false, false, 5);
-
-  // Add "Login" and "Cancel" buttons
-//  dialog.addButton("Cancel", Gtk.ResponseType.CANCEL);
-//  dialog.addButton("Login", Gtk.ResponseType.OK);
-
-  // Show all elements
-//  dialog.showAll();
-
-  // Wait for user response
-//  dialog.connect("response", (widget, response) => {
-//    if (response === Gtk.ResponseType.OK) {
-//      console.log("Logging in with:", usernameEntry.getText(), passwordEntry.getText());
-//    }
-//    dialog.destroy(); // Close the dialog
-//  });
-//}
-
-// Create a login button
-//const loginButton = new Gtk.Button({ label: "Log In" });
-//loginButton.connect("clicked", () => showLoginDialog(win));
-
-//const box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 10 });
-//box.packStart(loginButton, false, false, 10);
-//win.add(box);
+const loginButton = new Gtk.button({ label: "login"});
+loginButton.on("clicked", () => {
+    const loginWin = new Gtk.Window();
+    loginWin.setTitle("Login prompt");
+    loginWin.setDefaultSize(300, 200);
+    const logintext = new Gtk.label({ label: "Welcome back! Enter you username and password"});
+    loginWin.add(logintext);
+    loginWin.showAll();
+})
+win.add(loginButton);
 
 // --------- NEW CHATGPT STUFF END ---------
 
