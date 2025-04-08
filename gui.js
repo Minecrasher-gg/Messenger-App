@@ -23,7 +23,7 @@ loginButton.on("clicked", () => {
     loginWin.add(lbox);
     loginWin.showAll();
 })
-lbox.packStart(loginButton, false, false, 0);
+vbox.packStart(loginButton, false, false, 0);
 
 // --------- NEW CHATGPT STUFF END ---------
 
