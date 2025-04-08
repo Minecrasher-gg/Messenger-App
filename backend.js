@@ -23,10 +23,13 @@ admin.initializeApp({
 
 const db = admin.database();
 const messagesRef = db.ref("messages");
+const usersRef = db.ref("user accounts");
 
 // Store messages locally (for faster GUI updates)
 let messages = [];
 let usernames = [];
+let userAccs = [];
+let userKeyphr = [];
 
 // Function to send a message
 function sendMessage(username, message) {
@@ -41,6 +44,15 @@ function sendMessage(username, message) {
   //console.log("Message sent:", message);
 }
 
+function addUser(user, key) {
+    if (!username.trim()) return;
+    
+    usersRef.push({
+        username: user,
+        keyphrase: key,
+    });
+}
+
 // Function to get messages
 function getMessages() {
   return messages;
@@ -49,6 +61,14 @@ function getMessages() {
 function getUsernames() {
   return usernames;
 }
+
+usersRef.on("child_added", (snapshot) => {
+    const AllUsers = snapshot.val().username;
+    const AllPWS = snapshot.val().keyphrase;
+    userAccs.push(AllUsers);
+    userKeyphr.push(AllPWS);
+    
+});
 
 // Listen for new messages in real-time
 messagesRef.on("child_added", (snapshot) => {
@@ -60,4 +80,4 @@ messagesRef.on("child_added", (snapshot) => {
 });
 
 // Export functions for GUI to use
-module.exports = { sendMessage, getMessages, getUsernames };
+module.exports = { sendMessage, getMessages, getUsernames, addUser};
