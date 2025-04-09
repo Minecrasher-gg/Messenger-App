@@ -45,7 +45,7 @@ function sendMessage(username, message) {
 }
 
 function addUser(user, key) {
-    if (!username.trim()) return;
+    if (!user.trim()) return;
     
     usersRef.push({
         username: user,
