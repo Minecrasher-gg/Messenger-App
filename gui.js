@@ -94,8 +94,7 @@ RegisterButton.on("clicked", () => {
           RegisterResult.setMarkup(`<span foreground="lightblue">${message}</span>`);
           rBox.packStart(RegisterResult, false, false, 10);
           RegisterWin.showAll();
-          
-          //backend.addUser(PutInUsername, PutInKeyphr);
+          backend.addUser(PutInUsername, PutInKeyphr);
         }
       }else {
         rBox.remove(RegisterResult);
