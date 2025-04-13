@@ -1,6 +1,10 @@
 const gi = require('node-gtk');
+const GdkPixbuf = require("node-gtk").require("GdkPixbuf");
 const Gtk = gi.require('Gtk', '3.0');
-const backend = require('./backend'); // Import backend
+const { PythonShell } = require('python-shell');
+const path = require('path');
+const backend = require('./backend');
+const Notify = require('./notifier');
 
 let loggedIn = false;
 
@@ -10,18 +14,83 @@ Gtk.init();
 // Create window
 const win = new Gtk.Window();
 win.setTitle('Messenger');
-win.setDefaultSize(400, 300);
+win.setDefaultSize(1000, 600);
 win.connect('destroy', () => {
     Gtk.mainQuit();
     process.exit(0);
 });
+
 // Dark mode for the homies
 const settings = Gtk.Settings.getDefault();
 settings.gtkApplicationPreferDarkTheme = true;
 
+// Function to start the tray and listen for messages
+function startTray() {
+  trayProcess = new PythonShell('tray-icon.py', {
+    mode: 'text',
+    pythonPath: 'python3', // Or just 'python' depending on your system
+  });
+
+  // Listen for messages from the tray
+  trayProcess.on('message', (message) => {
+
+    // If message is SHOW_APP, focus the app window
+    if (message === 'SHOW_APP') {
+      if (win) {
+        win.present();
+      }
+    }
+
+    // If message is QUIT_APP, quit the app
+    if (message === 'QUIT_APP') {
+      // Kill the Python process and exit the Node.js process
+      trayProcess.kill();
+      Gtk.mainQuit();  // Quit the Gtk event loop
+      process.exit(0); // Exit the Node.js process
+    }
+  });
+
+  // Handle clean exit (kill the Python process when the app exits)
+  process.on('exit', () => trayProcess.kill());
+  process.on('SIGINT', () => {
+    trayProcess.kill();
+    Gtk.mainQuit();  // Ensure the Gtk app quits properly
+    process.exit();
+  });
+  process.on('SIGTERM', () => {
+    trayProcess.kill();
+    Gtk.mainQuit();  // Ensure the Gtk app quits properly
+    process.exit();
+  });
+}
+
+startTray();
+
+// Box for horizontal layout for the server list
+const MAINBox = new Gtk.Box({
+  orientation: Gtk.Orientation.HORIZONTAL,
+  spacing: 10,
+});
+
+// Box for the servers
+const sidebar = new Gtk.Box({
+  orientation: Gtk.Orientation.VERTICAL,
+  spacing: 5,
+});
+
+// Box for the send button and stuff
+const SendBox = new Gtk.Box({
+  orientation: Gtk.Orientation.HORIZONTAL,
+  spacing: 10,
+})
+
 // Box for putting all the Buttons n shit into
 const vbox = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 10 });
-win.add(vbox);
+
+// All windows getting put into one
+MAINBox.packStart(sidebar, false, false, 0);
+MAINBox.packStart(vbox, false, false, 0);
+win.add(MAINBox);
 
 // Everything for the login window that needs to be accessed outside itself
 const loginWin = new Gtk.Window();
@@ -47,7 +116,11 @@ loginButton.on("clicked", () => {
     });
     const usernameEntry = new Gtk.Entry();
     const passwordEntry = new Gtk.Entry();
-    passwordEntry.connect('activate', TryLogin);
+    passwordEntry.connect('activate', () => {
+      PutInUsername = usernameEntry.getText(); 
+      PutInKeyphr = passwordEntry.getText(); 
+      TryLogin();
+    });
     lbox.packStart(logintext, false, false, 10);
     lbox.packStart(usernametext, false, false, 10);
     lbox.packStart(usernameEntry, false, false, 10);
@@ -124,6 +197,7 @@ chatDisplay.setEditable(false);
 const chatBuffer = chatDisplay.getBuffer();
 const scrolledWindow = new Gtk.ScrolledWindow();
 scrolledWindow.add(chatDisplay);
+scrolledWindow.setSizeRequest(800, 400);
 
 // Login beggar
 const LoginPlease = new Gtk.Label();
@@ -131,10 +205,24 @@ LoginPlease.setMarkup('<span foreground="red" size="20480">Please log in to view
 
 // Input field
 const entry = new Gtk.Entry();
+entry.setSizeRequest(400, 50);
 ChatToolsShouldShow();
 
 // Send button
-const sendButton = new Gtk.Button({ label: 'Send' });
+const sendButton = new Gtk.Button();
+const pixbufSend = GdkPixbuf.Pixbuf.newFromFileAtScale(
+  "./icons/send.png",
+  40,  // width
+  40,  // height
+  true // preserve aspect ratio
+);
+const SendImage = Gtk.Image.newFromPixbuf(pixbufSend);
+sendButton.setImage(SendImage);
+sendButton.setAlwaysShowImage(true);
+
+// Example server button
+const Server1Button = new Gtk.Button({ label: "S1"});
+sidebar.packStart(Server1Button, false, false, 0);
 
 // Function to send a message
 function sendMessage() {
@@ -149,9 +237,10 @@ function sendMessage() {
 // function to hide and show chat stuff
 function ChatToolsShouldShow() {
   if (loggedIn == true) {
+    SendBox.packStart(entry, false, false, 0);
+    SendBox.packStart(sendButton, false, false, 0);
     vbox.packStart(scrolledWindow, true, true, 0);
-    vbox.packStart(entry, false, false, 0);
-    vbox.packStart(sendButton, false, false, 0);
+    vbox.packStart(SendBox, false, false, 0);
     vbox.remove(loginButton);
     vbox.remove(RegisterButton);
   }else {
@@ -161,6 +250,7 @@ function ChatToolsShouldShow() {
 
 const NoUser = new Gtk.Label();
 const WrongPw = new Gtk.Label();
+const SuccessfulLogin = new Gtk.Label();
 
 // function for login validation
 function TryLogin() {
@@ -180,6 +270,9 @@ function TryLogin() {
     lbox.remove(WrongPw);
     lbox.remove(NoUser);
     win.showAll();
+    SuccessfulLogin.setMarkup('<span foreground="lightblue">Success! You can close this window now</span>');
+    lbox.packStart(SuccessfulLogin, false, false, 10);
+    loginWin.showAll();
   }else {
     lbox.remove(WrongPw);
     lbox.remove(NoUser);
@@ -191,6 +284,7 @@ function TryLogin() {
 
 // Function to update chat display
 let cachedMessageCount = 0;
+let FirstUse = true;
 
 function updateChatDisplay() {
   const messages = backend.getMessages();
@@ -199,7 +293,7 @@ function updateChatDisplay() {
   if (loggedIn == false) {
     chatBuffer.setText('', 0);
     const iter = chatBuffer.getEndIter();
-    const markuplogin= `<span foreground="blue">loading messages...</span>\n`;
+    const markuplogin= `<span foreground="blue" size="16000">loading messages...</span>\n`;
     chatBuffer.insertMarkup(iter, markuplogin, -1);
     return;
   }
@@ -214,15 +308,22 @@ function updateChatDisplay() {
   chatBuffer.setText('', 0); // Clear the buffer
   const iter = chatBuffer.getEndIter();
   for (let i = 0; i < usernames.length; i++) {
-    const markupUsername = `<span foreground="red">${usernames[i]}</span>\n`;
-    const markupMessage = `<span foreground="grey">${messages[i]}</span>\n`;
+    const markupUsername = `<span foreground="red" size="14000">${usernames[i]}</span>\n`;
+    const markupMessage = `<span foreground="grey" size="14000">${messages[i]}</span>\n`;
     chatBuffer.insertMarkup(iter, markupUsername, -1);
     chatBuffer.insertMarkup(iter, markupMessage, -1);
   }
   // Scroll to bottom after updating chat
   const mark = chatBuffer.createMark(null, chatBuffer.getEndIter(), false);
   chatDisplay.scrollToMark(mark, 0, true, 0, 1); // chatView is your Gtk.TextView
-}
+
+  // Notify about new message message
+  if (FirstUse == true) {
+    FirstUse = false;
+  }else if (PutInUsername != usernames[usernames.length-1]) {
+    Notify.SendNotification("New message", messages[messages.length-1]);
+  };
+};
 
 // Real-time message updates
 setInterval(updateChatDisplay, 1000); // Refresh every second
@@ -230,6 +331,12 @@ setInterval(updateChatDisplay, 1000); // Refresh every second
 // Event listeners
 sendButton.connect('clicked', sendMessage);
 entry.connect('activate', sendMessage);
+
+// Prevent closing (instead hiding)
+win.on("delete-event", (ev) => {
+  win.hide();
+  return true; // prevents default behavior (destroy)
+});
 
 // Show window
 win.showAll();

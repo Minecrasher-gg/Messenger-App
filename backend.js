@@ -1,5 +1,4 @@
 const admin = require("firebase-admin");
-const fs = require("fs");
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 // Load Firebase credentials
@@ -70,19 +69,6 @@ function getUserKeyphr() {
   return userKeyphr;
 }
 
-usersRef.once("value")
-  .then((snapshot) => {
-    snapshot.forEach((childSnap) => {
-      const AllUsers = childSnap.val().username;
-      const AllPWS = childSnap.val().keyphrase;
-      userAccs.push(AllUsers);
-      userKeyphr.push(AllPWS);
-    });
-  })
-  .catch((err) => {
-    console.error("Failed to fetch users:", err);
-  });
-
 usersRef.on("child_added", (snapshot) => {
     const AllUsers = snapshot.val().username;
     const AllPWS = snapshot.val().keyphrase;
@@ -96,7 +82,6 @@ messagesRef.on("child_added", (snapshot) => {
   const newUsername = snapshot.val().user;
   messages.push(newMessage);
   usernames.push(newUsername);
-  //console.log("New Message:", newMessage);
 });
 
 // Export functions for GUI to use
