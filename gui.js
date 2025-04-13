@@ -26,7 +26,7 @@ settings.gtkApplicationPreferDarkTheme = true;
 
 // Function to start the tray and listen for messages
 function startTray() {
-  trayProcess = new PythonShell('tray-icon.py', {
+  trayProcess = new PythonShell('./icons/tray-icon.py', {
     mode: 'text',
     pythonPath: 'python3', // Or just 'python' depending on your system
   });
@@ -211,7 +211,7 @@ ChatToolsShouldShow();
 // Send button
 const sendButton = new Gtk.Button();
 const pixbufSend = GdkPixbuf.Pixbuf.newFromFileAtScale(
-  "./icons/send.png",
+  "./icons/icons/send.png",
   40,  // width
   40,  // height
   true // preserve aspect ratio
