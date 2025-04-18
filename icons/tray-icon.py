@@ -6,7 +6,7 @@ def main():
     app = QApplication(sys.argv)
 
     tray = QSystemTrayIcon()
-    tray.setIcon(QIcon("./icons/icons/trayicon.png"))
+    tray.setIcon(QIcon("./icons/icons/tray icon.png"))
     tray.setToolTip("Da Chatting Bois")
 
     menu = QMenu()
