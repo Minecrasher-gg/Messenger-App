@@ -1,4 +1,5 @@
 const admin = require("firebase-admin");
+const { Server } = require("http");
 require('dotenv').config({ path: require('path').join(__dirname, '.env') });
 
 // Load Firebase credentials
@@ -21,26 +22,30 @@ admin.initializeApp({
 });
 
 const db = admin.database();
-const messagesRef = db.ref("messages");
 const usersRef = db.ref("user accounts");
+const ServerKeys = db.ref("Server Keys");
 
 // Store messages locally (for faster GUI updates)
-let messages = [];
-let usernames = [];
 let userAccs = [];
 let userKeyphr = [];
+let ServerKeyphrs = [];
+let ServersWithKey = [];
+let CurrentServer = 1;
+
+// --------- ALL SERVER INFO ---------
+let messages = [];
+let usernames = [];
 
 // Function to send a message
-function sendMessage(username, message) {
+function sendMessage(username, message, serverName) {
   if (!message.trim()) return;
-  
-  messagesRef.push({
+  let Server2Ref = db.ref("servers/"+ serverName);
+
+  Server2Ref.push({
     text: message,
     user: username,
     timestamp: Date.now(),
   });
-
-  //console.log("Message sent:", message);
 }
 
 function addUser(user, key) {
@@ -53,8 +58,26 @@ function addUser(user, key) {
 }
 
 // Function to get messages
-function getMessages() {
+async function getMessages(ID) {
+  await GetDynamicMessages(ID);
+  CurrentServer = ID;
   return messages;
+}
+
+async function GetDynamicMessages(ref) {
+  const ThisRef = db.ref("servers/" + ref);
+  console.log("Current ref:", "servers/" + ref);
+
+  messages = []; // Clear old messages
+  usernames = [];
+
+  const snapshot = await ThisRef.once("value");
+  snapshot.forEach(childSnapshot => {
+    const newMessage = childSnapshot.val().text;
+    const newUsername = childSnapshot.val().user;
+    messages.push(newMessage);
+    usernames.push(newUsername);
+  });
 }
 
 function getUsernames() {
@@ -62,27 +85,47 @@ function getUsernames() {
 }
 
 function getUserAccs() {
-    return userAccs;
+  return userAccs;
 }
 
 function getUserKeyphr() {
   return userKeyphr;
 }
 
+function ServerHasKey(Name) {
+  return ServersWithKey.includes(Name);
+}
+
+function GetServerKey(Name) {
+  return ServerKeyphrs[ServersWithKey.indexOf(Name)];
+}
+
+function CheckServerExists(serverID) {
+  const AttemptRef = db.ref("servers/"+ serverID);
+
+  return AttemptRef.once('value')
+    .then(snapshot => {
+      return snapshot.exists();
+    })
+    .catch(error => {
+      console.error("Error checking server:", error);
+      return false;
+    });
+};
+
 usersRef.on("child_added", (snapshot) => {
-    const AllUsers = snapshot.val().username;
-    const AllPWS = snapshot.val().keyphrase;
-    userAccs.push(AllUsers);
-    userKeyphr.push(AllPWS);
+  const AllUsers = snapshot.val().username;
+  const AllPWS = snapshot.val().keyphrase;
+  userAccs.push(AllUsers);
+  userKeyphr.push(AllPWS);
 });
 
-// Listen for new messages in real-time
-messagesRef.on("child_added", (snapshot) => {
-  const newMessage = snapshot.val().text;
-  const newUsername = snapshot.val().user;
-  messages.push(newMessage);
-  usernames.push(newUsername);
+ServerKeys.on("child_added", (snapshot) => {
+  const AllServers = snapshot.val().serverID;
+  const ServerKeyphrase = snapshot.val().SKey;
+  ServersWithKey.push(AllServers);
+  ServerKeyphrs.push(ServerKeyphrase);
 });
 
 // Export functions for GUI to use
-module.exports = { sendMessage, getMessages, getUsernames, addUser, getUserAccs, getUserKeyphr};
+module.exports = { sendMessage, getMessages, getUsernames, addUser, getUserAccs, getUserKeyphr, CheckServerExists, ServerHasKey, GetServerKey};

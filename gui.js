@@ -5,6 +5,7 @@ const { PythonShell } = require('python-shell');
 const path = require('path');
 const backend = require('./backend');
 const Notify = require('./notifier');
+const AddServer = require('./AddServer.js');
 
 let loggedIn = false;
 
@@ -77,6 +78,7 @@ const sidebar = new Gtk.Box({
   orientation: Gtk.Orientation.VERTICAL,
   spacing: 5,
 });
+sidebar.setSizeRequest(80, 700);
 
 // Box for the send button and stuff
 const SendBox = new Gtk.Box({
@@ -242,9 +244,34 @@ const SendImage = Gtk.Image.newFromPixbuf(pixbufSend);
 sendButton.setImage(SendImage);
 sendButton.setAlwaysShowImage(true);
 
-// Example server button
-const Server1Button = new Gtk.Button({ label: "S1"});
+// Server ID setter
+let CurrentServer = 1;
+let CurrentServerName ="mainServer";
+
+// Main server button
+const Server1Button = new Gtk.Button({ label: "MainServer"});
+const Server1Name = "mainServer";
 sidebar.packStart(Server1Button, false, false, 0);
+Server1Button.on("clicked", () => {
+  CurrentServer = 1;
+  CurrentServerName = Server1Name;
+});
+
+// ------ ALL server buttons
+const Server2Button = new Gtk.Button();
+let Server2Name = "";
+const Server3Button = new Gtk.Button();
+let Server3Name = "";
+
+// ------ ALL server button functions
+Server2Button.on("clicked", () => {
+  CurrentServer = 2;
+  CurrentServerName = Server2Name;
+});
+Server3Button.on("clicked", () => {
+  CurrentServer = 3;
+  CurrentServerName = Server3Name;
+});
 
 // Add server button
 const AddServerButton = new Gtk.Button();
@@ -257,13 +284,36 @@ const pixbufAddServer = GdkPixbuf.Pixbuf.newFromFileAtScale(
 const AddServerImage = Gtk.Image.newFromPixbuf(pixbufAddServer);
 AddServerButton.setImage(AddServerImage);
 AddServerButton.setAlwaysShowImage(true);
+AddServerButton.on("clicked", () => {
+  let ServerCount = 0;
+    const ButtonCount = sidebar.getChildren(); // Get all child widgets
+    ButtonCount.forEach(child => {
+      ServerCount++;
+    });
+  AddServer.AddServer(ServerCount).then(serverID => {
+    if (ServerCount == 2) {
+      Server2Button.setLabel(serverID);
+      Server2Name = serverID;
+      sidebar.packStart(Server2Button, false, false, 0);
+    }else if (ServerCount == 3) {
+      Server3Button.setLabel(serverID);
+      Server3Name = serverID;
+      sidebar.packStart(Server3Button, false, false, 0);
+    };
+    sidebar.remove(AddServerButton);
+    sidebar.packStart(AddServerButton, false, false, 0);
+    win.showAll();
+  }).catch(err => {
+    console.log("Add server canceled or failed:", err);
+  });
+});
 
 // Function to send a message
 function sendMessage() {
     const message = entry.getText();
     const username = PutInUsername;
     if (message.trim() !== '') {
-        backend.sendMessage(username, message); // Call backend function
+        backend.sendMessage(username, message, CurrentServerName); // Call backend function
         entry.setText('');
     }
 }
@@ -273,7 +323,6 @@ function ChatToolsShouldShow() {
   if (loggedIn == true) {
     SendBox.packStart(entry, false, false, 0);
     SendBox.packStart(sendButton, false, false, 0);
-    //vbox.packStart(scrolledWindow, true, true, 0);
     sidebar.packStart(AddServerButton, false, false, 0);
     vbox.packStart(scrolledBWindow, false, false, 0);
     vbox.packStart(SendBox, false, false, 0);
@@ -358,8 +407,8 @@ function createStyledButton(label, color) {
   Messagebox.add(button);
 }
 
-function updateChatDisplay() {
-  const messages = backend.getMessages();
+async function updateChatDisplay() {
+  const messages = await backend.getMessages(CurrentServerName);
   const usernames = backend.getUsernames();
 
   if (loggedIn == false) {
@@ -377,8 +426,8 @@ function updateChatDisplay() {
   for (let i = 0; i < usernames.length; i++) {
     const StringUsername = String(usernames[i]);
     const StringMessage = String(messages[i]);
-    const UsernameButton = createStyledButton( StringUsername, "red");
-    const MessageButton = createStyledButton( StringMessage, "grey");
+    createStyledButton( StringUsername, "red");
+    createStyledButton( StringMessage, "grey");
     win.showAll();
   }
 
