@@ -66,7 +66,6 @@ async function getMessages(ID) {
 
 async function GetDynamicMessages(ref) {
   const ThisRef = db.ref("servers/" + ref);
-  console.log("Current ref:", "servers/" + ref);
 
   messages = []; // Clear old messages
   usernames = [];
@@ -113,6 +112,24 @@ function CheckServerExists(serverID) {
     });
 };
 
+function SetBot(Bot, status) {
+    let BotStatus = "";
+    if (status == true) {
+        BotStatus = "launch";
+    }else {
+        BotStatus = "stop"
+    }
+  const ref = db.ref("RaspberryBots/"+ Bot);
+  ref.update({
+    status: BotStatus
+  });
+};
+
+async function GetAllowList() {
+  const snapshot = await db.ref('RaspberryBots/Config/allowlist').once('value');
+  return snapshot.val();
+}
+
 usersRef.on("child_added", (snapshot) => {
   const AllUsers = snapshot.val().username;
   const AllPWS = snapshot.val().keyphrase;
@@ -128,4 +145,4 @@ ServerKeys.on("child_added", (snapshot) => {
 });
 
 // Export functions for GUI to use
-module.exports = { sendMessage, getMessages, getUsernames, addUser, getUserAccs, getUserKeyphr, CheckServerExists, ServerHasKey, GetServerKey};
+module.exports = { sendMessage, getMessages, getUsernames, addUser, getUserAccs, getUserKeyphr, CheckServerExists, ServerHasKey, GetServerKey, SetBot, GetAllowList};

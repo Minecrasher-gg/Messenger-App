@@ -5,7 +5,7 @@ const { PythonShell } = require('python-shell');
 const path = require('path');
 const backend = require('./backend');
 const Notify = require('./notifier');
-const AddServer = require('./AddServer.js');
+const AddServer = require('./AddServer');
 
 let loggedIn = false;
 
@@ -247,12 +247,14 @@ sendButton.setAlwaysShowImage(true);
 // Server ID setter
 let CurrentServer = 1;
 let CurrentServerName ="mainServer";
+lastPing: Date.now()
 
 // Main server button
 const Server1Button = new Gtk.Button({ label: "MainServer"});
 const Server1Name = "mainServer";
 sidebar.packStart(Server1Button, false, false, 0);
 Server1Button.on("clicked", () => {
+  CheckMinecraftMenu();
   CurrentServer = 1;
   CurrentServerName = Server1Name;
 });
@@ -265,10 +267,12 @@ let Server3Name = "";
 
 // ------ ALL server button functions
 Server2Button.on("clicked", () => {
+  CheckMinecraftMenu();
   CurrentServer = 2;
   CurrentServerName = Server2Name;
 });
 Server3Button.on("clicked", () => {
+  CheckMinecraftMenu();
   CurrentServer = 3;
   CurrentServerName = Server3Name;
 });
@@ -308,6 +312,73 @@ AddServerButton.on("clicked", () => {
   });
 });
 
+const MinecraftMenuBox = new Gtk.Box({
+  orientation: Gtk.Orientation.VERTICAL,
+  spacing: 10,
+});
+
+const MinecraftBot1 = new Gtk.Box({
+  orientation: Gtk.Orientation.HORIZONTAL,
+  spacing: 10,
+});
+
+const FirstBotSwitch = new Gtk.Switch()
+FirstBotSwitch.setActive(false) // Default state
+const SwitchAlign = new Gtk.Alignment({ xalign: 0.5, yalign: 0.5, xscale: 0, yscale: 0 });
+SwitchAlign.add(FirstBotSwitch);
+
+// Event listener for the switch
+FirstBotSwitch.on('state-set', (switchWidget) => {
+  backend.SetBot("Minebit", FirstBotSwitch.getActive());
+  return false;
+});
+
+const AllowedUsersList = new Gtk.Label();
+
+const MinecraftControlButton = new Gtk.Button();
+const pixbufMinecraftControl = GdkPixbuf.Pixbuf.newFromFileAtScale(
+  "./icons/icons/Minecraft control.svg",
+  30,
+  30,
+  true
+);
+let MinecraftMenuOpen = false;
+const MinecraftControlImage = Gtk.Image.newFromPixbuf(pixbufMinecraftControl);
+
+const MinecraftHeaderMarkup = `<span foreground="Lightgrey" size="18000">Minecraft bot manager</span>`;
+const MinecraftTextHeader = new Gtk.Label();
+MinecraftTextHeader.setMarkup(MinecraftHeaderMarkup);
+const MinecraftText1 = new Gtk.Label({ label:"Minecraft bot #1 (Minebit)"});
+MinecraftControlButton.setImage(MinecraftControlImage);
+MinecraftControlButton.setAlwaysShowImage(true);
+
+MinecraftMenuBox.packStart(MinecraftTextHeader, false, false, 30);
+MinecraftBot1.packStart(MinecraftText1, false, false, 0);
+MinecraftBot1.packStart(SwitchAlign, false, false, 0);
+MinecraftBot1.packStart(AllowedUsersList, false, false, 0);
+MinecraftMenuBox.packStart(MinecraftBot1, false, false, 0);
+
+MinecraftControlButton.on("clicked", () => {
+  backend.GetAllowList().then(data => {
+    const usernames = Object.keys(data);
+    AllowedUsersList.setText("Permitted:  "+ usernames.join(', '));
+  });
+  vbox.remove(scrolledBWindow);
+  vbox.remove(SendBox);
+  vbox.packStart(MinecraftMenuBox, false, false, 0);
+  vbox.showAll();
+  MinecraftMenuOpen = true;
+});
+
+// function to check if the Minecraft Menu is currently open
+function CheckMinecraftMenu() {
+  if (MinecraftMenuOpen == true) {
+    vbox.packStart(scrolledBWindow, false, false, 0);
+    vbox.packStart(SendBox, false, false, 0);
+  };
+};
+
+
 // Function to send a message
 function sendMessage() {
     const message = entry.getText();
@@ -315,8 +386,8 @@ function sendMessage() {
     if (message.trim() !== '') {
         backend.sendMessage(username, message, CurrentServerName); // Call backend function
         entry.setText('');
-    }
-}
+    };
+};
 
 // function to hide and show chat stuff
 function ChatToolsShouldShow() {
@@ -324,6 +395,7 @@ function ChatToolsShouldShow() {
     SendBox.packStart(entry, false, false, 0);
     SendBox.packStart(sendButton, false, false, 0);
     sidebar.packStart(AddServerButton, false, false, 0);
+    sidebar.packStart(MinecraftControlButton, false, false, 0);
     vbox.packStart(scrolledBWindow, false, false, 0);
     vbox.packStart(SendBox, false, false, 0);
     vbox.remove(loginButton);
