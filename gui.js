@@ -322,14 +322,41 @@ const MinecraftBot1 = new Gtk.Box({
   spacing: 10,
 });
 
-const FirstBotSwitch = new Gtk.Switch()
-FirstBotSwitch.setActive(false) // Default state
-const SwitchAlign = new Gtk.Alignment({ xalign: 0.5, yalign: 0.5, xscale: 0, yscale: 0 });
-SwitchAlign.add(FirstBotSwitch);
+const MinecraftBot2 = new Gtk.Box({
+  orientation: Gtk.Orientation.HORIZONTAL,
+  spacing: 10,
+});
+
+const MinecraftBot3 = new Gtk.Box({
+  orientation: Gtk.Orientation.HORIZONTAL,
+  spacing: 10,
+});
+
+const FirstBotSwitch = new Gtk.Switch();
+const SecondBotSwitch = new Gtk.Switch();
+const ThirdBotSwitch = new Gtk.Switch();
+FirstBotSwitch.setActive(false);
+SecondBotSwitch.setActive(false);
+ThirdBotSwitch.setActive(false);
+const SwitchAlign1 = new Gtk.Alignment({ xalign: 0.5, yalign: 0.5, xscale: 0, yscale: 0 });
+const SwitchAlign2 = new Gtk.Alignment({ xalign: 0.5, yalign: 0.5, xscale: 0, yscale: 0 });
+const SwitchAlign3 = new Gtk.Alignment({ xalign: 0.5, yalign: 0.5, xscale: 0, yscale: 0 });
+SwitchAlign1.add(FirstBotSwitch);
+SwitchAlign2.add(SecondBotSwitch);
+SwitchAlign3.add(ThirdBotSwitch);
 
 // Event listener for the switch
 FirstBotSwitch.on('state-set', (switchWidget) => {
   backend.SetBot("Minebit", FirstBotSwitch.getActive());
+  return false;
+});
+SecondBotSwitch.on('state-set', (switchWidget) => {
+  backend.SetBot("Minebat", SecondBotSwitch.getActive());
+  return false;
+});
+
+ThirdBotSwitch.on('state-set', (switchWidget) => {
+  backend.SetBot("Minebot", ThirdBotSwitch.getActive());
   return false;
 });
 
@@ -348,15 +375,23 @@ const MinecraftControlImage = Gtk.Image.newFromPixbuf(pixbufMinecraftControl);
 const MinecraftHeaderMarkup = `<span foreground="Lightgrey" size="18000">Minecraft bot manager</span>`;
 const MinecraftTextHeader = new Gtk.Label();
 MinecraftTextHeader.setMarkup(MinecraftHeaderMarkup);
-const MinecraftText1 = new Gtk.Label({ label:"Minecraft bot #1 (Minebit)"});
+const MinecraftText1 = new Gtk.Label({ label:"Minecraft bot #1 (Minebit) "});
+const MinecraftText2 = new Gtk.Label({ label:"Minecraft bot #2 (Minebat)"});
+const MinecraftText3 = new Gtk.Label({ label:"Minecraft bot #3 (Minebot)"});
 MinecraftControlButton.setImage(MinecraftControlImage);
 MinecraftControlButton.setAlwaysShowImage(true);
 
 MinecraftMenuBox.packStart(MinecraftTextHeader, false, false, 30);
 MinecraftBot1.packStart(MinecraftText1, false, false, 0);
-MinecraftBot1.packStart(SwitchAlign, false, false, 0);
+MinecraftBot1.packStart(SwitchAlign1, false, false, 0);
 MinecraftBot1.packStart(AllowedUsersList, false, false, 0);
+MinecraftBot2.packStart(MinecraftText2, false, false, 0);
+MinecraftBot2.packStart(SwitchAlign2, false, false, 0);
+MinecraftBot3.packStart(MinecraftText3, false, false, 0);
+MinecraftBot3.packStart(SwitchAlign3, false, false, 0);
 MinecraftMenuBox.packStart(MinecraftBot1, false, false, 0);
+MinecraftMenuBox.packStart(MinecraftBot2, false, false, 0);
+MinecraftMenuBox.packStart(MinecraftBot3, false, false, 0);
 
 MinecraftControlButton.on("clicked", () => {
   backend.GetAllowList().then(data => {
@@ -373,8 +408,10 @@ MinecraftControlButton.on("clicked", () => {
 // function to check if the Minecraft Menu is currently open
 function CheckMinecraftMenu() {
   if (MinecraftMenuOpen == true) {
+    vbox.remove(MinecraftMenuBox);
     vbox.packStart(scrolledBWindow, false, false, 0);
     vbox.packStart(SendBox, false, false, 0);
+    vbox.showAll();
   };
 };
 
